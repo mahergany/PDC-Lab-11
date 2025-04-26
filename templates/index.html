@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Solr Flask Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f9f9f9;
+        }
+        input[type="text"], select {
+            padding: 8px;
+            width: 250px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            padding: 8px 16px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #fff;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px #ccc;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Search Solr Data</h1>
+    <form method="get" action="/">
+        <input type="text" name="q" id="searchBox" placeholder="Enter search query..." value="{{ query }}">
+        
+        <select name="category">
+            <option value="">All Categories</option>
+            <option value="java">Java</option>
+            <option value="solr">Solr</option>
+        </select>
+
+        <select name="published">
+            <option value="">All</option>
+            <option value="true">Published</option>
+            <option value="false">Unpublished</option>
+        </select>
+
+        <input type="submit" value="Search">
+    </form>
+
+    {% if results %}
+        <h2>Results:</h2>
+        <ul>
+        {% for doc in results %}
+            <li>
+                <strong>Title:</strong> {{ doc.title }}<br>
+                <strong>Author:</strong> {{ doc.author }}<br>
+                <strong>Category:</strong> {{ doc.category }}<br>
+                <strong>Published:</strong> {{ doc.published }}
+            </li>
+        {% endfor %}
+        </ul>
+    {% elif query %}
+        <p>No results found for "<strong>{{ query }}</strong>".</p>
+    {% endif %}
+
+    <script>
+        $(function() {
+            $("#searchBox").on("input", function() {
+                var searchTerm = $(this).val();
+                if (searchTerm.length > 1) {
+                    $.getJSON("/autocomplete", { term: searchTerm }, function(data) {
+                        console.log("Suggestions:", data);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
